@@ -1,18 +1,13 @@
 {
-  "name": "smarthome-integrado",
+  "name": "smarthome-montse",
+  "version": "1.0.0",
   "private": true,
-  "version": "2.0.0",
+  "description": "Simulador web de automatización con instrucciones escritas",
   "scripts": {
-    "dev": "npm --prefix frontend run dev",
-    "start": "node backend/src/server.mjs",
-    "db:migrate": "node backend/src/migrate.mjs",
-    "db:seed": "node backend/src/seed.mjs",
-    "db:setup": "npm run db:migrate && npm run db:seed",
-    "test": "node --test backend/tests/*.test.mjs",
-    "build": "npm --prefix frontend run build",
-    "install:frontend": "npm --prefix frontend install"
+    "start": "node backend/server.js",
+    "test": "node --test"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=18"
   }
 }
