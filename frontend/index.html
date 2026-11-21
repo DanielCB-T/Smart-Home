@@ -1,31 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmartHome | Centro de control</title>
-  <link rel="stylesheet" href="/styles.css" />
-  <script src="/app.js" defer></script>
 </head>
 <body>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="brand"><span class="brand-logo">⌂</span><span>Smart<span class="accent">Home</span><small>SISTEMA INTELIGENTE</small></span></div>
-      <p class="side-heading">PANEL PRINCIPAL</p>
-      <a class="nav-active" href="#dispositivos">▦ &nbsp; Dispositivos</a>
-      <a href="#consola">⌘ &nbsp; Consola de comandos</a>
-      <a href="#historial">◷ &nbsp; Historial</a>
-      <div class="sidebar-bottom"><span class="online-dot"></span> Servidor conectado <small>Simulador doméstico · v1.0</small></div>
-    </aside>
-    <main>
-      <header class="topbar"><div><span class="eyebrow">SMART HOME / DASHBOARD</span><h1>Centro de control — Montse</h1><p>Luces, ventiladores y condiciones.</p></div><div class="avatar">SH</div></header>
-      <div id="alert" class="alert" role="status" aria-live="polite"></div>
-      <section class="stats"><div class="stat"><span>DISPOSITIVOS</span><strong id="count-total">—</strong><small>Registrados en el sistema</small></div><div class="stat"><span>ACTIVOS / ABIERTOS</span><strong id="count-active">—</strong><small>En funcionamiento ahora</small></div><div class="stat temp-stat"><span>TEMPERATURA AMBIENTE</span><strong><span id="temp-value">—</span><span class="unit">°C</span></strong><label for="temperature">Modificar temperatura</label><div class="temp-control"><input id="temperature" type="number" min="-20" max="60" step="1" value="28"/><button id="set-temp" type="button">Actualizar</button></div></div></section>
-      <section id="dispositivos" class="section"><div class="section-title"><div><h2>Dispositivos de la casa</h2><p>Estado actual de tus equipos simulados</p></div><span class="section-tag">EN TIEMPO REAL</span></div><div id="device-grid" class="device-grid"></div></section>
-      <div class="bottom-grid"><section id="consola" class="panel"><div class="panel-heading"><div><h2>⌘ &nbsp; Consola de instrucciones</h2><p>Controla dispositivos mediante comandos escritos</p></div><span class="terminal-dot"></span></div><form id="command-form"><label for="command">ESCRIBE UNA INSTRUCCIÓN</label><div class="command-row"><input id="command" type="text" maxlength="300" placeholder="Ej. ENCENDER luz_sala" autocomplete="off" required/><button type="submit">Ejecutar →</button></div></form><div class="examples"><span>PRUEBA ESTOS COMANDOS</span><button class="example" data-command="ENCENDER luz_sala">ENCENDER luz_sala</button><button class="example" data-command="APAGAR ventilador1">APAGAR ventilador1</button><button class="example" data-command="SI temperatura > 30 ENTONCES ENCENDER ventilador1">SI temperatura &gt; 30 ENTONCES ENCENDER ventilador1</button></div><div class="result" id="result" aria-live="polite">Esperando instrucciones…</div></section>
-      <section id="historial" class="panel"><div class="panel-heading"><div><h2>◷ &nbsp; Historial de actividad</h2><p>Últimas instrucciones y operaciones</p></div><span class="history-label">RECIENTES</span></div><div id="history" class="history"><p class="empty">Aún no hay actividad.</p></div></section></div>
-      <footer>SmartHome · Simulación de automatización inteligente · Proyecto académico</footer>
-    </main>
-  </div>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
