@@ -1,1 +1,1 @@
-aún no sé
+no sé que poner aún
