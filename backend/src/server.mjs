@@ -3,6 +3,7 @@ import { URL, fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { db, snapshot, record, assertMigrated } from './database.mjs';
 import { executeCommand, changeDevice } from './commands.mjs';
+import { analyzeWithPython, executableCommand } from './python_bridge.mjs';
 
 const port = Number(process.env.PORT || 3001);
 const corsHeaders = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
@@ -52,11 +53,26 @@ export function makeServer() {
           return json(res, result.success ? 200 : 422, { result, ...snapshot() });
         }
       }
-      if (req.method === 'POST' && route === '/api/command') {
+      if (req.method === 'POST' && (route === '/api/command' || route === '/api/analyze')) {
         const input = await body(req);
-        if (typeof input.command !== 'string' || input.command.length > 300) return json(res, 400, { error: 'El comando debe ser texto de máximo 300 caracteres.' });
-        const result = executeCommand(input.command);
-        return json(res, result.success ? 200 : 422, { result, ...snapshot() });
+        if (typeof input.command !== 'string' || !input.command.trim() || input.command.length > 300)
+          return json(res, 400, { error: 'El comando debe ser texto de 1 a 300 caracteres.' });
+        let analysis;
+        try { analysis = await analyzeWithPython(input.command); }
+        catch (error) { return json(res, 503, { error: error.message }); }
+        if (route === '/api/analyze') return json(res, analysis.ok ? 200 : 422, analysis);
+        if (!analysis.ok) {
+          const message = analysis.error?.mensaje || 'Instrucción inválida.';
+          const result = record(input.command, message, false);
+          return json(res, 422, { result, analysis, ...snapshot() });
+        }
+        const executable = executableCommand(analysis.ast);
+        if (executable.error) {
+          const result = record(input.command, executable.error, false);
+          return json(res, 422, { result, analysis, ...snapshot() });
+        }
+        const result = executeCommand(executable.command);
+        return json(res, result.success ? 200 : 422, { result, analysis, ...snapshot() });
       }
       if (req.method === 'PUT' && route === '/api/temperature') {
         const input = await body(req);
