@@ -1,12 +1,15 @@
-export type DeviceType = 'luz' | 'ventilador' | 'puerta' | 'alarma';
-export interface Device {
+export type TipoDispositivo = 'luz' | 'ventilador' | 'puerta' | 'alarma';
+
+export interface Dispositivo {
   id: string;
   name: string;
-  type: DeviceType;
+  type: TipoDispositivo;
+  estado: string;
   on?: boolean;
   open?: boolean;
 }
-export interface HistoryEntry {
+
+export interface Registro {
   id: number;
   timestamp: string;
   command: string;
@@ -14,11 +17,28 @@ export interface HistoryEntry {
   success: boolean;
   skipped: boolean;
 }
-export interface HomeState {
-  devices: Device[];
-  temperature: number;
-  history: HistoryEntry[];
+
+export interface ErrorLenguaje {
+  tipo: string;
+  mensaje: string;
+  linea: number;
+  columna: number;
 }
-export interface CommandResponse extends HomeState {
-  result: HistoryEntry;
+
+export interface Analisis {
+  ok: boolean;
+  ast?: unknown;
+  ir?: unknown;
+  error?: ErrorLenguaje;
+}
+
+export interface Estado {
+  devices: Dispositivo[];
+  temperature: number;
+  history: Registro[];
+}
+
+export interface RespuestaComando extends Estado {
+  result: Registro;
+  analysis: Analisis;
 }

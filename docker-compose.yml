@@ -1,0 +1,36 @@
+# SmartHome: backend (FastAPI), frontend (Vite) y Mailpit.
+# Uso: cp .env.example .env && docker compose up --build
+
+services:
+  backend:
+    build: ./backend
+    env_file: .env
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    volumes:
+      - smarthome-data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3001/api/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    env_file: .env
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      - VITE_API_PROXY=http://backend:3001
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_WEB_PORT:-8025}:8025"
+      - "1025:1025"
+
+volumes:
+  smarthome-data:

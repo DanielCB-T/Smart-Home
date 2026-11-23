@@ -1,24 +1,42 @@
-import type { HomeState, CommandResponse } from './types';
+import type { Estado, RespuestaComando } from './types';
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, init);
-  const body: unknown = await response.json();
-  if (!response.ok && !(body && typeof body === 'object' && 'result' in body)) {
-    const message = body && typeof body === 'object' && 'error' in body
-      ? String(body.error) : 'Error al contactar el servidor.';
-    throw new Error(message);
+export class ErrorApi extends Error {}
+
+function mensajeDeError(cuerpo: unknown, estado: number): string {
+  if (cuerpo && typeof cuerpo === 'object') {
+    const datos = cuerpo as Record<string, unknown>;
+    if (typeof datos.error === 'string') return datos.error;
+    if (typeof datos.detail === 'string') return datos.detail;
+    if (Array.isArray(datos.detail)) return 'Los datos enviados no son válidos.';
   }
-  return body as T;
+  return `Error del servidor (${estado}).`;
 }
-const jsonHeaders = { 'Content-Type': 'application/json' };
+
+async function peticion<T>(ruta: string, init?: RequestInit): Promise<T> {
+  let respuesta: Response;
+  try {
+    respuesta = await fetch(ruta, init);
+  } catch {
+    throw new ErrorApi('No hay conexión con el servidor de SmartHome.');
+  }
+  const cuerpo: unknown = await respuesta.json().catch(() => null);
+
+  // Las instrucciones fallidas responden 422 con el resultado: no son errores de red.
+  if (cuerpo && typeof cuerpo === 'object' && 'result' in cuerpo) return cuerpo as T;
+  if (!respuesta.ok) throw new ErrorApi(mensajeDeError(cuerpo, respuesta.status));
+  return cuerpo as T;
+}
+
+const json = (cuerpo: unknown): RequestInit => ({
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(cuerpo)
+});
+
 export const api = {
-  state: () => request<HomeState>('/api/state'),
-  command: (command: string) => request<CommandResponse>('/api/command', {
-    method: 'POST', headers: jsonHeaders, body: JSON.stringify({ command })
-  }),
-  temperature: (temperature: number) => request<HomeState>('/api/temperature', {
-    method: 'PUT', headers: jsonHeaders, body: JSON.stringify({ temperature })
-  }),
-  devices: () => request<HomeState['devices']>('/api/devices'),
-  history: () => request<HomeState['history']>('/api/history')
+  estado: () => peticion<Estado>('/api/state'),
+  comando: (command: string) => peticion<RespuestaComando>('/api/command', { method: 'POST', ...json({ command }) }),
+  accion: (id: string, action: string) =>
+    peticion<RespuestaComando>(`/api/devices/${encodeURIComponent(id)}`, { method: 'PATCH', ...json({ action }) }),
+  temperatura: (temperature: number) => peticion<Estado>('/api/temperature', { method: 'PUT', ...json({ temperature }) })
 };
+

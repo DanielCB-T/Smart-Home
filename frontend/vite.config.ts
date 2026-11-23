@@ -1,10 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+// En Docker, la API responde en el servicio "backend" y no en localhost.
+const apiTarget = process.env.VITE_API_PROXY || 'http://localhost:3001';
+
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: '0.0.0.0',
     port: 5173,
-    proxy: { '/api': 'http://localhost:3001' }
+    proxy: { '/api': apiTarget }
   }
 });
