@@ -1,0 +1,53 @@
+(* Gramática formal del lenguaje de SmartHome (EBNF).                       *)
+(* Implementada en backend/app/language/parser.py (descenso recursivo).     *)
+(* Los tokens se describen en docs/lenguaje/tokens.md.                      *)
+
+programa      = { SALTO_LINEA } ,
+                { instruccion , SALTO_LINEA , { SALTO_LINEA } } ,
+                EOF ;
+
+instruccion   = simple | condicional ;
+
+simple        = control | consultar | listar | establecer | notificar | enviar_correo ;
+
+control       = ( "ENCENDER" | "APAGAR" | "ACTIVAR" | "DESACTIVAR" | "ABRIR" | "CERRAR" ) , IDENTIFICADOR ;
+
+consultar     = "CONSULTAR" , IDENTIFICADOR ;
+
+listar        = "LISTAR" , "DISPOSITIVOS" ;
+
+establecer    = "ESTABLECER" , IDENTIFICADOR , NUMERO ;
+
+notificar     = "NOTIFICAR" , CADENA ;
+
+enviar_correo = "ENVIAR" , "CORREO" , "A" , CADENA , "MENSAJE" , CADENA ;
+
+condicional   = "SI" , condicion , "ENTONCES" , accion ;
+
+accion        = simple ;                       (* no se permite SI dentro de SI *)
+
+condicion     = IDENTIFICADOR , operador , valor ;
+
+operador      = "==" | "!=" | ">" | "<" | ">=" | "<=" ;
+
+valor         = NUMERO | ESTADO ;
+
+ESTADO        = "ENCENDIDO" | "APAGADO" | "ACTIVADA" | "DESACTIVADA" | "ABIERTA" | "CERRADA" ;
+
+(* Léxico *)
+IDENTIFICADOR = letra_o_guion , { letra_o_guion | dígito } ;
+NUMERO        = [ "-" ] , dígito , { dígito } , [ "." , dígito , { dígito } ] ;
+CADENA        = '"' , { carácter_sin_comilla_ni_salto } , '"'
+              | "'" , { carácter_sin_comilla_ni_salto } , "'" ;
+SALTO_LINEA   = "\n" ;
+letra_o_guion = letra_ascii | "_" ;
+letra_ascii   = "A" | ... | "Z" | "a" | ... | "z" ;
+dígito        = "0" | ... | "9" ;
+
+(* Notas:
+   - Las palabras reservadas no distinguen mayúsculas y minúsculas.
+   - Los identificadores sí distinguen mayúsculas y minúsculas al escribirse;
+     la búsqueda en la tabla de símbolos no las distingue.
+   - Un comentario empieza con '#' y termina al final de la línea.
+   - La gramática solo valida la estructura. Si un dispositivo existe, o si una
+     operación es compatible con su tipo, lo decide la fase semántica.        *)

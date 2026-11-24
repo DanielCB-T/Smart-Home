@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smarthome.local/contratos/ast.schema.json",
+  "title": "AST de SmartHome",
+  "description": "Representación serializada del árbol sintáctico abstracto que devuelve el analizador (Programa.a_dict). Los campos linea y columna son base 1.",
+  "$ref": "#/$defs/Programa",
+  "$defs": {
+    "posicion": {
+      "properties": {
+        "linea": { "type": "integer", "minimum": 0 },
+        "columna": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["linea", "columna"]
+    },
+    "Programa": {
+      "type": "object",
+      "properties": {
+        "tipo": { "const": "Programa" },
+        "instrucciones": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/Control" },
+              { "$ref": "#/$defs/Consultar" },
+              { "$ref": "#/$defs/Listar" },
+              { "$ref": "#/$defs/Establecer" },
+              { "$ref": "#/$defs/Notificar" },
+              { "$ref": "#/$defs/EnviarCorreo" },
+              { "$ref": "#/$defs/Condicional" }
+            ]
+          }
+        }
+      },
+      "required": ["tipo", "instrucciones"],
+      "allOf": [{ "$ref": "#/$defs/posicion" }]
+    },
+    "Control": {
+      "type": "object",
+      "properties": {
+        "tipo": { "const": "Control" },
+        "operacion": { "enum": ["ENCENDER", "APAGAR", "ACTIVAR", "DESACTIVAR", "ABRIR", "CERRAR"] },
+        "dispositivo": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" }
+      },
+      "required": ["tipo", "operacion", "dispositivo"],
+      "allOf": [{ "$ref": "#/$defs/posicion" }]
+    },
+    "Consultar": {
+      "type": "object",
+      "properties": {
+        "tipo": { "const": "Consultar" },
+        "dispositivo": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" }
+      },
+      "required": ["tipo", "dispositivo"],
+      "allOf": [{ "$ref": "#/$defs/posicion" }]
+    },
+    "Listar": {
+      "type": "object",
+      "properties": { "tipo": { "const": "Listar" } },
+      "required": ["tipo"],
+      "allOf": [{ "$ref": "#/$defs/posicion" }]
+    },
+    "Establecer": {
+      "type": "object",
+      "properties": {
+        "tipo": { "const": "Establecer" },
+        "dispositivo": { "type": "string" },
+        "valor": { "type": "number" }
+      },
+      "required": ["tipo", "dispositivo", "valor"],
+      "allOf": [{ "$ref": "#/$defs/posicion" }]
+    },
+    "Notificar": {
+      "type": "object",
+      "properties": {
+        "tipo": { "const": "Notificar" },
+        "mensaje": { "type": "string" }
+      },
+      "required": ["tipo", "mensaje"],
+      "allOf": [{ "$ref": "#/$defs/posicion" }]
+    },
+    "EnviarCorreo": {
+      "type": "object",
+      "properties": {
+        "tipo": { "const": "EnviarCorreo" },
+        "destinatario": { "type": "string" },
+        "mensaje": { "type": "string" }
+      },
+      "required": ["tipo", "destinatario", "mensaje"],
+      "allOf": [{ "$ref": "#/$defs/posicion" }]
+    },
+    "Condicional": {
+      "type": "object",
+      "properties": {
+        "tipo": { "const": "Condicional" },
+        "condicion": { "$ref": "#/$defs/Condicion" },
+        "accion": {
+          "oneOf": [
+            { "$ref": "#/$defs/Control" },
+            { "$ref": "#/$defs/Consultar" },
+            { "$ref": "#/$defs/Listar" },
+            { "$ref": "#/$defs/Establecer" },
+            { "$ref": "#/$defs/Notificar" },
+            { "$ref": "#/$defs/EnviarCorreo" }
+          ]
+        }
+      },
+      "required": ["tipo", "condicion", "accion"],
+      "allOf": [{ "$ref": "#/$defs/posicion" }]
+    },
+    "Condicion": {
+      "type": "object",
+      "properties": {
+        "tipo": { "const": "Condicion" },
+        "izquierda": { "type": "string" },
+        "operador": { "enum": ["==", "!=", ">", "<", ">=", "<="] },
+        "derecha": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": { "tipo": { "const": "Numero" }, "valor": { "type": "number" } },
+              "required": ["tipo", "valor"]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tipo": { "const": "Estado" },
+                "valor": { "enum": ["ENCENDIDO", "APAGADO", "ACTIVADA", "DESACTIVADA", "ABIERTA", "CERRADA"] }
+              },
+              "required": ["tipo", "valor"]
+            }
+          ]
+        }
+      },
+      "required": ["tipo", "izquierda", "operador", "derecha"],
+      "allOf": [{ "$ref": "#/$defs/posicion" }]
+    }
+  }
+}
