@@ -150,6 +150,36 @@ Ejecuta estas instrucciones en la consola o con `POST /api/command`, en este ord
 | `SI luz_sala == ENCENDIDO ENTONCES APAGAR luz_sala` | 200, se ejecuta solo si la luz está encendida |
 | `NOTIFICAR "Prueba"` | 422, sintaxis válida; ejecución pendiente (S2-10) |
 
+## Gestión de dispositivos
+
+Desde la interfaz, el botón **Nuevo dispositivo** (o la tarjeta punteada) abre un modal para registrar un dispositivo. El lápiz edita y el icono de papelera elimina, con confirmación. Cada alta, edición y baja se registra en el historial y se muestra con una alerta de SweetAlert2.
+
+Reglas de los identificadores: empiezan con letra o guion bajo, usan solo letras, números y guion bajo (máximo 40), no pueden ser palabras reservadas del lenguaje (ENCENDER, SI, ENTONCES, etc.) ni repetir otro identificador, sin distinguir mayúsculas.
+
+Endpoints correspondientes:
+
+| Método | Ruta | Uso |
+|---|---|---|
+| POST | `/api/devices` | Registrar (201) |
+| PUT | `/api/devices/{id}` | Editar nombre, identificador o categoría |
+| DELETE | `/api/devices/{id}` | Eliminar |
+
+Ejemplo en PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post http://localhost:3001/api/devices -ContentType "application/json" `
+  -Body '{"id":"luz_pasillo","name":"Luz del pasillo","type":"luz"}'
+Invoke-RestMethod -Method Delete http://localhost:3001/api/devices/luz_pasillo
+```
+
+## Tema claro y oscuro
+
+El botón de la barra superior alterna entre modo claro y oscuro. La preferencia se guarda en el navegador; la primera vez sigue la configuración del sistema.
+
+## Árbol AST e IR
+
+El panel **Árbol sintáctico abstracto** muestra el AST de la última instrucción analizada, con tres vistas: árbol gráfico, IR (instrucciones intermedias) y JSON del AST.
+
 ## Dispositivos iniciales
 
 | Identificador | Tipo | Estado inicial | Operaciones |

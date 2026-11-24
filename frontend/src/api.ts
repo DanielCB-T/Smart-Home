@@ -1,4 +1,4 @@
-import type { Estado, RespuestaComando } from './types';
+import type { DispositivoEntrada, Estado, RespuestaComando } from './types';
 
 export class ErrorApi extends Error {}
 
@@ -32,11 +32,15 @@ const json = (cuerpo: unknown): RequestInit => ({
   body: JSON.stringify(cuerpo)
 });
 
+const ruta = (id: string) => `/api/devices/${encodeURIComponent(id)}`;
+
 export const api = {
   estado: () => peticion<Estado>('/api/state'),
   comando: (command: string) => peticion<RespuestaComando>('/api/command', { method: 'POST', ...json({ command }) }),
-  accion: (id: string, action: string) =>
-    peticion<RespuestaComando>(`/api/devices/${encodeURIComponent(id)}`, { method: 'PATCH', ...json({ action }) }),
+  accion: (id: string, action: string) => peticion<RespuestaComando>(ruta(id), { method: 'PATCH', ...json({ action }) }),
+  crearDispositivo: (datos: DispositivoEntrada) => peticion<Estado>('/api/devices', { method: 'POST', ...json(datos) }),
+  editarDispositivo: (idOriginal: string, datos: DispositivoEntrada) =>
+    peticion<Estado>(ruta(idOriginal), { method: 'PUT', ...json(datos) }),
+  eliminarDispositivo: (id: string) => peticion<Estado>(ruta(id), { method: 'DELETE' }),
   temperatura: (temperature: number) => peticion<Estado>('/api/temperature', { method: 'PUT', ...json({ temperature }) })
 };
-

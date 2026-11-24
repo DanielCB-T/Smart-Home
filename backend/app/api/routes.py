@@ -16,13 +16,16 @@ from app.db import (
     leer_temperatura,
     registrar,
 )
+from app.servicios import dispositivos as servicio_dispositivos
 from app.servicios.comandos import analizar_solo, procesar
+from app.servicios.dispositivos import ErrorDispositivo
 
 from .schemas import (
     AccionDispositivo,
     Analisis,
     Comando,
     Dispositivo,
+    DispositivoEntrada,
     Estado,
     ErrorSimple,
     Health,
@@ -92,6 +95,39 @@ def ejecutar_comando(cuerpo: Comando) -> JSONResponse:
 def analizar(cuerpo: Comando) -> JSONResponse:
     codigo, respuesta = analizar_solo(cuerpo.command)
     return _cuerpo(codigo, respuesta)
+
+
+def _traducir(error: ErrorDispositivo) -> HTTPException:
+    return HTTPException(status_code=error.codigo, detail=error.mensaje)
+
+
+@router.post("/devices", response_model=Estado, status_code=201, tags=["Dispositivos"],
+             responses={409: {"model": ErrorSimple}, 422: {"model": ErrorSimple}},
+             summary="Registra un dispositivo nuevo")
+def crear_dispositivo(cuerpo: DispositivoEntrada) -> dict:
+    try:
+        return servicio_dispositivos.crear(cuerpo.id, cuerpo.name, cuerpo.type)
+    except ErrorDispositivo as error:
+        raise _traducir(error) from error
+
+
+@router.put("/devices/{dispositivo_id}", response_model=Estado, tags=["Dispositivos"],
+            responses={404: {"model": ErrorSimple}, 409: {"model": ErrorSimple}, 422: {"model": ErrorSimple}},
+            summary="Edita un dispositivo existente")
+def editar_dispositivo(dispositivo_id: str, cuerpo: DispositivoEntrada) -> dict:
+    try:
+        return servicio_dispositivos.actualizar(dispositivo_id, cuerpo.id, cuerpo.name, cuerpo.type)
+    except ErrorDispositivo as error:
+        raise _traducir(error) from error
+
+
+@router.delete("/devices/{dispositivo_id}", response_model=Estado, tags=["Dispositivos"],
+               responses={404: {"model": ErrorSimple}}, summary="Elimina un dispositivo")
+def eliminar_dispositivo(dispositivo_id: str) -> dict:
+    try:
+        return servicio_dispositivos.eliminar(dispositivo_id)
+    except ErrorDispositivo as error:
+        raise _traducir(error) from error
 
 
 @router.get("/temperature", response_model=Temperatura, tags=["Sensor"])

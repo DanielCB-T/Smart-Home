@@ -9,6 +9,12 @@ export interface Dispositivo {
   open?: boolean;
 }
 
+export interface DispositivoEntrada {
+  id: string;
+  name: string;
+  type: TipoDispositivo;
+}
+
 export interface Registro {
   id: number;
   timestamp: string;
@@ -28,7 +34,7 @@ export interface ErrorLenguaje {
 export interface Analisis {
   ok: boolean;
   ast?: unknown;
-  ir?: unknown;
+  ir?: { version?: string; instrucciones: Record<string, unknown>[] };
   error?: ErrorLenguaje;
 }
 

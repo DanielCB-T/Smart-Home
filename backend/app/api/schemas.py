@@ -44,6 +44,12 @@ class AccionDispositivo(BaseModel):
     action: Literal["ENCENDER", "APAGAR", "ABRIR", "CERRAR", "ACTIVAR", "DESACTIVAR"]
 
 
+class DispositivoEntrada(BaseModel):
+    id: str = Field(min_length=1, max_length=40, examples=["luz_pasillo"])
+    name: str = Field(min_length=1, max_length=60, examples=["Luz del pasillo"])
+    type: Literal["luz", "ventilador", "puerta", "alarma"]
+
+
 class Temperatura(BaseModel):
     temperature: float = Field(ge=-20, le=60, examples=[30])
 
