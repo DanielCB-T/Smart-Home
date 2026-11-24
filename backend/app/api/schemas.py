@@ -65,6 +65,7 @@ class Analisis(BaseModel):
     ok: bool
     ast: Optional[dict] = None
     ir: Optional[dict] = None
+    ir_tac: Optional[list[str]] = Field(default=None, description='IR en código de tres direcciones')
     error: Optional[ErrorLenguajeModelo] = None
 
 

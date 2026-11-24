@@ -35,6 +35,7 @@ export interface Analisis {
   ok: boolean;
   ast?: unknown;
   ir?: { version?: string; instrucciones: Record<string, unknown>[] };
+  ir_tac?: string[];
   error?: ErrorLenguaje;
 }
 

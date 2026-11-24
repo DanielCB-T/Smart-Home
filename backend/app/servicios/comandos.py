@@ -10,6 +10,7 @@ from app.db import abrir, leer_dispositivos, leer_historial, leer_temperatura, r
 from app.language.errors import ErrorLenguaje
 from app.language.parser import analizar
 from app.semantic import TablaSimbolos, analizar_y_construir, generar_ir
+from app.semantic.tac import formatear_tac
 
 from .ejecutor import ErrorEjecucion, ejecutar_todas
 
@@ -36,7 +37,7 @@ def procesar(texto: str, ruta: Optional[Path] = None) -> tuple[int, dict]:
             resultado = registrar(conexion, comando, error.mensaje, False)
             return 422, _respuesta(conexion, resultado, {"ok": False, "error": error.a_dict()})
 
-        analisis = {"ok": True, "ast": programa.a_dict(), "ir": ir}
+        analisis = {"ok": True, "ast": programa.a_dict(), "ir": ir, "ir_tac": formatear_tac(ir)}
         try:
             mensaje, omitida = ejecutar_todas(conexion, instrucciones)
         except ErrorEjecucion as error:
@@ -58,7 +59,8 @@ def analizar_solo(texto: str, ruta: Optional[Path] = None) -> tuple[int, dict]:
         analizar_y_construir(programa, tabla)
     except ErrorLenguaje as error:
         return 422, {"ok": False, "error": error.a_dict()}
-    return 200, {"ok": True, "ast": programa.a_dict(), "ir": generar_ir(programa)}
+    ir = generar_ir(programa)
+    return 200, {"ok": True, "ast": programa.a_dict(), "ir": ir, "ir_tac": formatear_tac(ir)}
 
 
 def _respuesta(conexion, resultado: dict, analisis: dict) -> dict:

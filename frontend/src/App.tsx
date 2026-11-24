@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, ErrorApi } from './api';
-import AstPanel from './components/AstPanel';
+import IrPanel from './components/IrPanel';
 import CommandConsole from './components/CommandConsole';
 import DeviceCard from './components/DeviceCard';
 import DeviceModal from './components/DeviceModal';
@@ -138,7 +138,6 @@ export default function App() {
           <div>
             <div className="titulo-fila">
               <strong>SmartHome</strong>
-              <span className="etiqueta-version">Core v3.0</span>
             </div>
             <span className="texto-suave">Centro de control · Lenguajes y Autómatas II</span>
           </div>
@@ -203,7 +202,7 @@ export default function App() {
             <TemperaturePanel temperatura={estado?.temperature ?? 28} ocupado={ocupado} onFijar={fijarTemperatura} />
             <CommandConsole ocupado={ocupado} onEjecutar={ejecutar} />
             <ResultPanel respuesta={ultimo} />
-            <AstPanel analisis={ultimo?.analysis ?? null} />
+            <IrPanel analisis={ultimo?.analysis ?? null} />
           </div>
           <div className="columna columna-historial">
             <HistoryPanel historial={estado?.history ?? []} />
